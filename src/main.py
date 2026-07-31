@@ -22,6 +22,12 @@ while not state.game_over:
         used_words=state.used_words
     )
 
+    # 패배
+    if not response["success"]:
+        print("AI가 더 이상 단어를 찾지 못했습니다.")
+        state.finish("USER")
+        break
+
     ai_word = response["word"]
 
     print(f"AI > {ai_word}")
