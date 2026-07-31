@@ -1,71 +1,89 @@
-from state import GameState
-from openai_client import OpenAIClient
-
 class Validator:
-    def __init__(self, client: OpenAIClient):
+
+    def __init__(self, client):
         self.client = client
 
-    # 검증
-    def validate(self, previous: str, current: str, state: GameState):
-        # 중복 검증
+    def validate(self, previous: str, current: str, state) -> tuple[bool, str]:
+
+        current = current.strip()
+
+        # 빈 문자열
+        if not current:
+            return False, "단어를 입력해주세요."
+
+        # 첫 턴이 아닌 경우 끝말잇기 규칙 검사
+        if previous and not self.is_valid_chain(previous, current):
+            return False, "끝말잇기 규칙에 맞지 않습니다."
+
+        # 중복 단어
         if self.is_duplicate(current, state):
             return False, "이미 사용한 단어입니다."
 
-        # 규칙 검증
-        if not self.is_valid_chain(previous, current):
-            return False, "끝말잇기 규칙에 맞지 않습니다."
-
-        # 사유 출력
+        # AI 검증
         result = self.client.validate_word(current)
+
         if not result.get("success", True):
             return False, result["reason"]
-    
-        if not result["exists"]:
-            return False, result["reason"]
 
-        # 한방단어 검증
-        if state.allow_one_shot:
-            if len(state.used_words) <= 10 and result["one_shot"]:
-                return False, "10체인 이하에서는 한방단어를 사용할 수 없습니다."
-        else:
-            if result["one_shot"]:
+        # 표준국어대사전 등재 여부
+        if not result["exists"]:
+            return False, "표준국어대사전의 일반 명사가 아님"
+
+        # 한방단어 검사
+        if result["one_shot"]:
+            if state.allow_one_shot:
+                # 11번째 단어부터 허용
+                if len(state.used_words) <= 10:
+                    return False, "10체인 이하에서는 한방단어를 사용할 수 없습니다."
+            else:
                 return False, "한방단어는 사용할 수 없습니다."
 
         return True, ""
 
-    def is_duplicate(self, word: str, state: GameState) -> bool:
+    def is_valid_chain(self, previous: str, current: str) -> bool:
+        return current[0] in self.get_allowed_initials(previous[-1])
+
+    def is_duplicate(self, word: str, state) -> bool:
         return state.is_used(word)
 
-    def is_valid_chain(self, previous: str, current: str) -> bool:
-        if not previous or not current:
-            return False
-
-        return current[0] in self.get_allowed_initials(previous[-1])
-    
     # 두음 법칙
     def get_allowed_initials(self, last_char: str) -> set[str]:
         mapping = {
-            "녀": {"녀", "여"},
-            "뇨": {"뇨", "요"},
-            "뉴": {"뉴", "유"},
-            "니": {"니", "이"},
-            "랴": {"랴", "야"},
+            "라": {"라", "나"},
+            "락": {"락", "낙"},
+            "란": {"란", "난"},
+            "랄": {"랄", "날"},
+            "람": {"람", "남"},
+            "랍": {"랍", "납"},
+            "랑": {"랑", "낭"},
+            "래": {"래", "내"},
+            "랭": {"랭", "냉"},
+            "략": {"략", "약"},
             "량": {"량", "양"},
             "려": {"려", "여"},
             "력": {"력", "역"},
+            "련": {"련", "연"},
             "렬": {"렬", "열"},
             "렴": {"렴", "염"},
             "렵": {"렵", "엽"},
             "령": {"령", "영"},
             "례": {"례", "예"},
             "로": {"로", "노"},
-            "료": {"료", "요"},
+            "록": {"록", "녹"},
+            "론": {"론", "논"},
+            "롱": {"롱", "농"},
             "뢰": {"뢰", "뇌"},
+            "료": {"료", "요"},
             "루": {"루", "누"},
             "류": {"류", "유"},
+            "륙": {"륙", "육"},
+            "륜": {"륜", "윤"},
             "률": {"률", "율"},
             "륭": {"륭", "융"},
-            "리": {"리", "이"},
+            "르": {"르", "느"},
+            "린": {"린", "인"},
+            "림": {"림", "임"},
+            "립": {"립", "입"},
         }
 
         return mapping.get(last_char, {last_char})
