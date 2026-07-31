@@ -1,7 +1,7 @@
 from state import GameState
 from openai_client import OpenAIClient
 from validator import Validator
-
+from util import timed_input
 
 class Game:
     def __init__(self):
@@ -81,7 +81,7 @@ class Game:
         print()
 
         if user_turn:
-            print("단어를 입력해주세요.")
+            print("10초 이내에 단어를 입력해주세요.")
         else:
             print("AI가 생각 중...")
 
@@ -103,8 +103,19 @@ class Game:
     # 사용자 입력
     def user_turn(self):
         while not self.state.game_over:
-            user_word = input("당신 > ").strip()
+            user_word = timed_input("당신 > ", 10)
 
+            # 타임아웃
+            if user_word is None:
+                if self.handle_mistake(
+                    "USER",
+                    "(시간 초과)",
+                    "10초 안에 입력하지 않았습니다."
+                ):
+                    return
+                continue
+
+            # 단어 검증
             if self.process_word("USER", user_word):
                 return
 
