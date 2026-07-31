@@ -8,10 +8,10 @@ class OpenAIClient:
         self.client = OpenAI(api_key=OPENAI_API_KEY)
 
     def generate(self, current_word: str, used_words: set[str]) -> dict:
-        prompt = f"""
-            현재 단어: {current_word}
-            사용한 단어: {", ".join(used_words)}
-        """
+        prompt = (
+            f"현재 단어: {current_word}\n"
+            f"사용한 단어: {', '.join(sorted(used_words))}"
+        )
 
         response = self.client.responses.create(
             model=MODEL,
