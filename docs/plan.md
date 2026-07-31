@@ -168,8 +168,7 @@ AI는 항상 아래 JSON 형식으로 응답하도록 설계합니다.
 
 | 필드 | 설명 |
 | --- | --- |
-| `current_word` | 현재 이어야 하는 단어 |
-| `turn` | 현재 턴 번호 |
+| `current_word` | 현재 제시어 |
 | `chain_count` | 현재까지 이어진 단어 개수 |
 | `user_mistakes` | 사용자 실수 횟수 |
 | `ai_mistakes` | AI 실수 횟수 |
