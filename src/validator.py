@@ -17,6 +17,9 @@ class Validator:
 
         # 사유 출력
         result = self.client.validate_word(current)
+        if not result.get("success", True):
+            return False, result["reason"]
+    
         if not result["exists"]:
             return False, result["reason"]
 
