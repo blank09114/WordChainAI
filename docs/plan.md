@@ -56,6 +56,7 @@ WordChainAI/
 | --- | --- |
 | `main.py` | 프로그램의 진입점(Entry Point)입니다. 게임 객체를 생성하고 실행합니다. |
 | `game.py` | 게임의 전체 진행을 담당합니다. 턴 관리, 게임 상태 관리, 사용자 입력 처리 및 승패 판정을 수행합니다. |
+| `state.py` | 게임 상태(GameState)를 관리합니다. 현재 단어, 체인 수, 사용 단어 목록, 실수 횟수, 게임 종료 여부 등을 저장합니다. |
 | `openai_client.py` | OpenAI Responses API와의 통신을 담당합니다. 프롬프트를 전송하고 응답을 반환합니다. |
 | `validator.py` | 사용자와 AI의 응답을 검증합니다. JSON 형식, 끝말잇기 규칙, 중복 단어 등을 확인합니다. |
 | `prompt.py` | AI에게 전달할 시스템 프롬프트와 응답 형식을 관리합니다. |
@@ -133,7 +134,7 @@ AI는 항상 아래 JSON 형식으로 응답하도록 설계합니다.
 
 ```json
 {
-  "word": "사과"
+    "word": "사과"
 }
 ```
 
@@ -146,22 +147,22 @@ AI는 항상 아래 JSON 형식으로 응답하도록 설계합니다.
 
 ```json
 {
-  "current_word": "사과",
-  "turn": 12,
-  "chain_count": 11,
-  "user_mistakes": 1,
-  "ai_mistakes": 0,
-  "allow_one_shot": false,
-  "used_words": [
-    "학교",
-    "교실",
-    "실수",
-    "수박",
-    "박수",
-    "수영"
-  ],
-  "game_over": false,
-  "winner": null
+    "current_word": "사과",
+    "turn": 12,
+    "chain_count": 11,
+    "user_mistakes": 1,
+    "ai_mistakes": 0,
+    "allow_one_shot": false,
+    "used_words": [
+        "학교",
+        "교실",
+        "실수",
+        "수박",
+        "박수",
+        "수영"
+    ],
+    "game_over": false,
+    "winner": null
 }
 ```
 
