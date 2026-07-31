@@ -1,11 +1,12 @@
 from state import GameState
 from openai_client import OpenAIClient
-
+from validator import Validator
 
 class Game:
     def __init__(self):
         self.state = GameState()
         self.client = OpenAIClient()
+        self.validator = Validator(self.client)
 
     def run(self):
         print("끝말잇기를 시작합니다!")
@@ -17,6 +18,27 @@ class Game:
         while not self.state.game_over:
             # 사용자 차례
             user_word = input("당신 > ").strip()
+
+            valid, reason = self.validator.validate(
+                previous=self.state.current_word,
+                current=user_word,
+                state=self.state
+            )
+
+            if not valid:
+                self.state.add_mistake("USER")
+
+                print(f"사용자가 실수를 했습니다.")
+                print(f"단어: {user_word}")
+                print(f"사유: {reason}")
+                print(f"실수 횟수: {self.state.user_mistakes}/3")
+
+                if self.state.user_mistakes >= 4:
+                    self.state.finish("AI")
+                    break
+                
+                continue
+
             self.state.add_word(user_word)
 
             # AI 차례
@@ -31,6 +53,26 @@ class Game:
                 break
 
             ai_word = response["word"]
+
+            valid, reason = self.validator.validate(
+                previous=self.state.current_word,
+                current=ai_word,
+                state=self.state
+            )
+
+            if not valid:
+                self.state.add_mistake("AI")
+
+                print("AI가 실수를 했습니다.")
+                print(f"단어: {ai_word}")
+                print(f"사유: {reason}")
+                print(f"실수 횟수: {self.state.ai_mistakes}/3")
+
+                if self.state.ai_mistakes >= 4:
+                    self.state.finish("USER")
+                    break
+
+                continue
 
             print(f"AI > {ai_word}")
 
